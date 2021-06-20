@@ -76,6 +76,8 @@ uint8_t hexstr2byte(char* str)
     return ret;
 }
 
+uint8_t in_loop = 0;
+
 uint8_t run_alpha(char* root_alpha, uint8_t* i)
 {
     if(error == 1)
@@ -812,6 +814,102 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
 
                     return a;
                 }
+
+                case 0x08: /* loop */
+                {
+                    int first = *i, last;
+
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ')')
+                        {
+                            last = *i;
+                            break;
+                        }
+                    }
+
+                    in_loop = 1;
+                    for(;in_loop;)
+                    {
+                        *i = first;
+
+                        for(; *i < strlen(root_alpha); *i += 1)
+                        {
+                            if(root_alpha[*i] == 'a')
+                            {
+                                run_alpha(root_alpha, i);
+                                *i += 1;
+                            }
+                            else
+                            {
+                                fprintf(stderr, "error:%d: expected alpha\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            *i += 1;
+
+                            if(root_alpha[*i] == ')')
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                for(; *i < strlen(root_alpha); *i += 1)
+                                {
+                                    if(root_alpha[*i] == ' ') {}
+                                    else if(root_alpha[*i] == ',')
+                                    {
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        fprintf(stderr, "error:%d: expected character ')'\n", *i);
+
+                                        error = 1;
+                                        return 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    *i += 1;
+
+                    return 0;
+                }
+
+                case 0x09: /* break */
+                {
+                    *i += 1;
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == ')')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected character ')'\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+                    *i += 1;
+
+                    if(in_loop)
+                    {
+                        in_loop = 0;
+                    }
+                    else
+                    {
+                        fprintf(stderr, "error:%d: cannot break outside a loop", *i);
+                    }
+
+                    return 0;
+                }
             }
         }
         else
@@ -826,21 +924,41 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
     return 0; 
 }
 
-int main()
+int main(int argc, char* argv[])
 {
     memset(mem, 0, 255);
 
     char input[255];
 
-    puts("----------------------------------\n"
-         "| Alpha Calculus                 |\n"
-         "| Alpha has to be written as 'a' |\n"
-         "----------------------------------\n");
+    if(argc > 2)
+    {
+        fputs("Too many arguments!", stderr);
+        fprintf(stderr, "Usage: '%s [OPTIONAL: -n || --no-cursor]'\n", argv[0]);
+        exit(-1);
+    }
+
+    char* cur = ">";
+    
+    if(argc > 1)
+    {
+        if(strcmp(argv[1], "-n") == 0 || strcmp(argv[1], "--no-cursor") == 0)
+        {
+            cur = "";
+        }
+        else
+        {
+            fprintf(stderr, "Unknown argument '%s'\n", argv[1]);
+            fprintf(stderr, "Usage: '%s [OPTIONAL: -n || --no-cursor]'\n", argv[0]);
+            exit(-1);
+        }
+    }
+
 
     for(;;)
     {
         error = 0;
 
+        printf("%s", cur);
         fgets(input, 255, stdin);
 
         uint8_t i;

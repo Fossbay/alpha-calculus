@@ -22,3 +22,5 @@ the opcodes are listed below:
 * 0x05 = **sub(x, ...)**:       returns the subtraction of the arguments
 * 0x06 = **mul(...)**:          returns the multiplication of the arguments
 * 0x07 = **div(x, ...)**:       returns the division of the arguments
+* 0x08 = **loop(...)**:         loops a set of operations, equivalent to a **while(true)**
+* 0x09 = **break()**:           breaks a loop
