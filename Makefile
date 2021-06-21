@@ -2,14 +2,22 @@ ifeq ($(OS),Windows_NT)
 	OUTEXT := .exe
 endif
 
-OUT ?= bin/alpha-calc$(OUTEXT)
+MODERN_OUT ?= bin/Modern/alpha-calc$(OUTEXT)
+C64_OUT ?= bin/C64/alpha-calc.prg
 
-CFLAGS ?= -s -ansi -std=c89 -Ofast -Os -Iinclude -lm
+ifndef (C64_CC)
+	C64_CC = cl65
+endif
 
-all: $(OUT)
+CFLAGS ?= -s -ansi -std=c89 -Ofast -Os -lm
 
-$(OUT): src/alpha-calc.c
-	$(CC) -m32 $(CFLAGS) src/alpha-calc.c -o $@
+all: $(MODERN_OUT) $(C64_OUT)
+
+$(MODERN_OUT): alpha-calc.c
+	$(CC) $(CFLAGS) $< -o $@
+
+$(C64_OUT): alpha-calc.c
+	$(C64_CC) $< -o$@ -t c64
 
 .PHONY: clean
 clean:

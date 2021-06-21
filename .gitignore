@@ -1,3 +1,4 @@
 .vscode
-bin/*
+bin/Modern/*
+bin/C64/*
 !.gitkeep

@@ -2,8 +2,16 @@
 #include<stdint.h>
 #include<stdlib.h>
 #include<string.h>
-#include<math.h>
 #include<limits.h>
+
+uint8_t power(uint8_t base, uint8_t pow)
+{
+    uint8_t ret = 1;
+    for(; pow > 0; pow--)
+        ret *= base;
+
+    return ret;
+}
 
 uint8_t mem[255];
 uint8_t error = 0;
@@ -33,7 +41,7 @@ uint8_t hexstr2byte(char* str)
             case '8':
             case '9':
             {
-                digit = str[i] - 48;
+                digit = str[i] - '0';
 
                 break;
             }
@@ -45,7 +53,7 @@ uint8_t hexstr2byte(char* str)
             case 'E':
             case 'F':
             {
-                digit = str[i] - 55;
+                digit = str[i] - ('A' - 10);
 
                 break;
             }
@@ -57,7 +65,7 @@ uint8_t hexstr2byte(char* str)
             case 'e':
             case 'f':
             {
-                digit = str[i] - 87;
+                digit = str[i] - ('a' - 10);
 
                 break;
             }
@@ -70,7 +78,7 @@ uint8_t hexstr2byte(char* str)
             }
         }
 
-        ret += digit * pow(16, 1 - i);
+        ret += digit * power(16, 1 - i);
     }
 
     return ret;
@@ -80,10 +88,10 @@ uint8_t in_loop = 0;
 
 uint8_t run_alpha(char* root_alpha, uint8_t* i)
 {
-    if(error == 1)
-        return 0;
-
     uint8_t opcode;
+
+    if(error)
+        return 0;
 
     *i += 1;
     for(; *i < strlen(root_alpha); *i += 1)
@@ -91,16 +99,24 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
         if(root_alpha[*i] == ' ') {}
         else if(root_alpha[*i] == '#')
         {
+            char num[3];
             *i += 1;
-            opcode = hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' });
+            num[0] = root_alpha[*i];
+            num[1] = root_alpha[*i + 1];
+            num[2] = '\0';
+            opcode = hexstr2byte((char*)num);
             *i += 1;
 
             break;
         } 
         else if(root_alpha[*i] == '$')
         {
+            char num[3];
             *i += 1;
-            opcode = mem[hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' })];
+            num[0] = root_alpha[*i];
+            num[1] = root_alpha[*i + 1];
+            num[2] = '\0';
+            opcode = mem[hexstr2byte((char*)num)];
             *i += 1;
 
             break;
@@ -136,16 +152,24 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                         if(root_alpha[*i] == ' ') {}
                         else if(root_alpha[*i] == '#')
                         {
+                            char num[3];
                             *i += 1;
-                            addr = hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' });
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            addr = hexstr2byte((char*)num);
                             *i += 1;
 
                             break;
                         } 
                         else if(root_alpha[*i] == '$')
                         {
+                            char num[3];
                             *i += 1;
-                            addr = mem[hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' })];
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            addr = mem[hexstr2byte((char*)num)];
                             *i += 1;
 
                             break;
@@ -189,16 +213,24 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                         if(root_alpha[*i] == ' ') {}
                         else if(root_alpha[*i] == '#')
                         {
+                            char num[3];
                             *i += 1;
-                            val = hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' });
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            val = hexstr2byte((char*)num);
                             *i += 1;
 
                             break;
                         } 
                         else if(root_alpha[*i] == '$')
                         {
+                            char num[3];
                             *i += 1;
-                            val = mem[hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' })];
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            val = mem[hexstr2byte((char*)num)];
                             *i += 1;
 
                             break;
@@ -251,16 +283,24 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                         if(root_alpha[*i] == ' ') {}
                         else if(root_alpha[*i] == '#')
                         {
+                            char num[3];
                             *i += 1;
-                            exit_code = hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' });
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            exit_code = hexstr2byte((char*)num);
                             *i += 1;
 
                             break;
                         } 
                         else if(root_alpha[*i] == '$')
                         {
+                            char num[3];
                             *i += 1;
-                            exit_code = mem[hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' })];
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            exit_code = mem[hexstr2byte((char*)num)];
                             *i += 1;
 
                             break;
@@ -313,14 +353,22 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                         if(root_alpha[*i] == ' ') {}
                         else if(root_alpha[*i] == '#')
                         {
+                            char num[3];
                             *i += 1;
-                            val = hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' });
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            val = hexstr2byte((char*)num);
                             *i += 1;
                         } 
                         else if(root_alpha[*i] == '$')
                         {
+                            char num[3];
                             *i += 1;
-                            val = mem[hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' })];
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            val = mem[hexstr2byte((char*)num)];
                             *i += 1;
                         }
                         else if(root_alpha[*i] == 'a')
@@ -379,14 +427,22 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                         if(root_alpha[*i] == ' ') {}
                         else if(root_alpha[*i] == '#')
                         {
+                            char num[3];
                             *i += 1;
-                            val = hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' });
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            val = hexstr2byte((char*)num);
                             *i += 1;
                         } 
                         else if(root_alpha[*i] == '$')
                         {
+                            char num[3];
                             *i += 1;
-                            val = mem[hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' })];
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            val = mem[hexstr2byte((char*)num)];
                             *i += 1;
                         }
                         else if(root_alpha[*i] == 'a')
@@ -445,14 +501,22 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                         if(root_alpha[*i] == ' ') {}
                         else if(root_alpha[*i] == '#')
                         {
+                            char num[3];
                             *i += 1;
-                            b = hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' });
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = hexstr2byte((char*)num);
                             *i += 1;
                         } 
                         else if(root_alpha[*i] == '$')
                         {
+                            char num[3];
                             *i += 1;
-                            b = mem[hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' })];
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = mem[hexstr2byte((char*)num)];
                             *i += 1;
                         }
                         else if(root_alpha[*i] == 'a')
@@ -511,16 +575,24 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                         if(root_alpha[*i] == ' ') {}
                         else if(root_alpha[*i] == '#')
                         {
+                            char num[3];
                             *i += 1;
-                            a = hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' });
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = hexstr2byte((char*)num);
                             *i += 1;
 
                             break;
                         } 
                         else if(root_alpha[*i] == '$')
                         {
+                            char num[3];
                             *i += 1;
-                            a = mem[hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' })];
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = mem[hexstr2byte((char*)num)];
                             *i += 1;
 
                             break;
@@ -564,14 +636,22 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                         if(root_alpha[*i] == ' ') {}
                         else if(root_alpha[*i] == '#')
                         {
+                            char num[3];
                             *i += 1;
-                            b = hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' });
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = hexstr2byte((char*)num);
                             *i += 1;
                         } 
                         else if(root_alpha[*i] == '$')
                         {
+                            char num[3];
                             *i += 1;
-                            b = mem[hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' })];
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = mem[hexstr2byte((char*)num)];
                             *i += 1;
                         }
                         else if(root_alpha[*i] == 'a')
@@ -630,14 +710,22 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                         if(root_alpha[*i] == ' ') {}
                         else if(root_alpha[*i] == '#')
                         {
+                            char num[3];
                             *i += 1;
-                            b = hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' });
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = hexstr2byte((char*)num);
                             *i += 1;
                         } 
                         else if(root_alpha[*i] == '$')
                         {
+                            char num[3];
                             *i += 1;
-                            b = mem[hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' })];
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = mem[hexstr2byte((char*)num)];
                             *i += 1;
                         }
                         else if(root_alpha[*i] == 'a')
@@ -697,16 +785,24 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                         if(root_alpha[*i] == ' ') {}
                         else if(root_alpha[*i] == '#')
                         {
+                            char num[3];
                             *i += 1;
-                            a = hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' });
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = hexstr2byte((char*)num);
                             *i += 1;
 
                             break;
                         } 
                         else if(root_alpha[*i] == '$')
                         {
+                            char num[3];
                             *i += 1;
-                            a = mem[hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' })];
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = mem[hexstr2byte((char*)num)];
                             *i += 1;
 
                             break;
@@ -750,14 +846,22 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                         if(root_alpha[*i] == ' ') {}
                         else if(root_alpha[*i] == '#')
                         {
+                            char num[3];
                             *i += 1;
-                            b = hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' });
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = hexstr2byte((char*)num);
                             *i += 1;
                         } 
                         else if(root_alpha[*i] == '$')
                         {
+                            char num[3];
                             *i += 1;
-                            b = mem[hexstr2byte((char[]){ root_alpha[*i], root_alpha[*i + 1], '\0' })];
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = mem[hexstr2byte((char*)num)];
                             *i += 1;
                         }
                         else if(root_alpha[*i] == 'a')
@@ -835,6 +939,12 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
 
                         for(; *i < strlen(root_alpha); *i += 1)
                         {
+                            if(error)
+                            {
+                                in_loop = 0;
+                                break;
+                            }
+
                             if(root_alpha[*i] == 'a')
                             {
                                 run_alpha(root_alpha, i);
@@ -906,6 +1016,9 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                     else
                     {
                         fprintf(stderr, "error:%d: cannot break outside a loop", *i);
+
+                        error = 1;
+                        return 0;
                     }
 
                     return 0;
@@ -924,47 +1037,23 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
     return 0; 
 }
 
-int main(int argc, char* argv[])
+int main()
 {
-    memset(mem, 0, 255);
-
     char input[255];
-
-    if(argc > 2)
-    {
-        fputs("Too many arguments!", stderr);
-        fprintf(stderr, "Usage: '%s [OPTIONAL: -n || --no-cursor]'\n", argv[0]);
-        exit(-1);
-    }
-
-    char* cur = ">";
     
-    if(argc > 1)
-    {
-        if(strcmp(argv[1], "-n") == 0 || strcmp(argv[1], "--no-cursor") == 0)
-        {
-            cur = "";
-        }
-        else
-        {
-            fprintf(stderr, "Unknown argument '%s'\n", argv[1]);
-            fprintf(stderr, "Usage: '%s [OPTIONAL: -n || --no-cursor]'\n", argv[0]);
-            exit(-1);
-        }
-    }
-
+    memset(mem, 0, 255);
 
     for(;;)
     {
+        uint8_t i;
         error = 0;
 
-        printf("%s", cur);
+        printf(">");
         fgets(input, 255, stdin);
 
-        uint8_t i;
         for(i = 0; i < strlen(input); i++)
         {
-            if(error == 1)
+            if(error)
                 break;
 
             switch(input[i])
