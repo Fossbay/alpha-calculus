@@ -84,6 +84,41 @@ uint8_t hexstr2byte(char* str)
     return ret;
 }
 
+uint8_t get_ctrl_char(uint8_t ch)
+{
+    switch(ch)
+    {
+        case 'a':
+            return '\a';
+
+        case 'b':
+            return '\b';
+
+        case 'f':
+            return '\f';
+
+        case 'n':
+            return '\n';
+
+        case 'r':
+            return '\r';
+
+        case 't':
+            return '\t';
+
+        case 'v':
+            return '\v';
+
+        case '0':
+            return '\0';
+
+        case '$':
+            return '$';
+    }
+
+    return 0;
+}
+
 uint8_t in_loop = 0;
 
 uint8_t run_alpha(char* root_alpha, uint8_t* i)
@@ -174,6 +209,30 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
 
                             break;
                         }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                addr = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                addr = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            break;
+                        }
                         else if(root_alpha[*i] == 'a')
                         {
                             addr = run_alpha(root_alpha, i);
@@ -232,6 +291,30 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                             num[2] = '\0';
                             val = mem[hexstr2byte((char*)num)];
                             *i += 1;
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                val = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                val = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
 
                             break;
                         }
@@ -305,6 +388,30 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
 
                             break;
                         }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                exit_code = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                exit_code = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            break;
+                        }
                         else if(root_alpha[*i] == 'a')
                         {
                             exit_code = run_alpha(root_alpha, i);
@@ -370,6 +477,28 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                             num[2] = '\0';
                             val = mem[hexstr2byte((char*)num)];
                             *i += 1;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                val = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                val = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
                         }
                         else if(root_alpha[*i] == 'a')
                         {
@@ -445,6 +574,28 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                             val = mem[hexstr2byte((char*)num)];
                             *i += 1;
                         }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                val = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                val = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+                        }
                         else if(root_alpha[*i] == 'a')
                         {
                             val = run_alpha(root_alpha, i);
@@ -518,6 +669,28 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                             num[2] = '\0';
                             b = mem[hexstr2byte((char*)num)];
                             *i += 1;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                b = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                b = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
                         }
                         else if(root_alpha[*i] == 'a')
                         {
@@ -597,6 +770,30 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
 
                             break;
                         }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                a = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                a = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            break;
+                        }
                         else if(root_alpha[*i] == 'a')
                         {
                             a = run_alpha(root_alpha, i);
@@ -653,6 +850,28 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                             num[2] = '\0';
                             b = mem[hexstr2byte((char*)num)];
                             *i += 1;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                b = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                b = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
                         }
                         else if(root_alpha[*i] == 'a')
                         {
@@ -728,6 +947,28 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                             b = mem[hexstr2byte((char*)num)];
                             *i += 1;
                         }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                b = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                b = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+                        }
                         else if(root_alpha[*i] == 'a')
                         {
                             b = run_alpha(root_alpha, i);
@@ -794,7 +1035,7 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                             *i += 1;
 
                             break;
-                        } 
+                        }
                         else if(root_alpha[*i] == '$')
                         {
                             char num[3];
@@ -804,6 +1045,30 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                             num[2] = '\0';
                             a = mem[hexstr2byte((char*)num)];
                             *i += 1;
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                a = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                a = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
 
                             break;
                         }
@@ -863,6 +1128,28 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                             num[2] = '\0';
                             b = mem[hexstr2byte((char*)num)];
                             *i += 1;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                b = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                b = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
                         }
                         else if(root_alpha[*i] == 'a')
                         {
