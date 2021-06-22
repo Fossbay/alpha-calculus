@@ -21,4 +21,4 @@ $(C64_OUT): alpha-calc.c
 
 .PHONY: clean
 clean:
-	$(RM) $(OUT)
+	$(RM) $(MODERN_OUT) $(C64_OUT)

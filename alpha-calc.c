@@ -1206,78 +1206,162 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                     return a;
                 }
 
-                case 0x08: /* loop */
+                case 0x08: /* greater than */
                 {
-                    int first = *i, last;
+                    uint8_t a, b;
 
                     for(; *i < strlen(root_alpha); *i += 1)
                     {
-                        if(root_alpha[*i] == ')')
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == '#')
                         {
-                            last = *i;
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = hexstr2byte((char*)num);
+                            *i += 1;
+
+                            break;
+                        } 
+                        else if(root_alpha[*i] == '$')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = mem[hexstr2byte((char*)num)];
+                            *i += 1;
+
                             break;
                         }
-                    }
-
-                    in_loop = 1;
-                    for(;in_loop;)
-                    {
-                        *i = first;
-
-                        for(; *i < strlen(root_alpha); *i += 1)
+                        else if(root_alpha[*i] == '\'')
                         {
-                            if(error)
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
                             {
-                                in_loop = 0;
-                                break;
-                            }
-
-                            if(root_alpha[*i] == 'a')
-                            {
-                                run_alpha(root_alpha, i);
-                                *i += 1;
+                                a = root_alpha[*i];
                             }
                             else
                             {
-                                fprintf(stderr, "error:%d: expected alpha\n", *i);
+                                *i += 1;
+                                a = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
 
                                 error = 1;
                                 return 0;
                             }
 
+                            break;
+                        }
+                        else if(root_alpha[*i] == 'a')
+                        {
+                            a = run_alpha(root_alpha, i);
                             *i += 1;
 
-                            if(root_alpha[*i] == ')')
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                for(; *i < strlen(root_alpha); *i += 1)
-                                {
-                                    if(root_alpha[*i] == ' ') {}
-                                    else if(root_alpha[*i] == ',')
-                                    {
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        fprintf(stderr, "error:%d: expected character ')'\n", *i);
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected value, address or alpha\n", *i);
 
-                                        error = 1;
-                                        return 0;
-                                    }
-                                }
-                            }
+                            error = 1;
+                            return 0;
+                        }
+                    }
+
+                    *i += 1;
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == ',')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected character ','\n", *i);
+
+                            error = 1;
+                            return 0;
                         }
                     }
                     *i += 1;
+                    
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == '#')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = hexstr2byte((char*)num);
+                            *i += 1;
 
-                    return 0;
-                }
+                            break;
+                        } 
+                        else if(root_alpha[*i] == '$')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = mem[hexstr2byte((char*)num)];
+                            *i += 1;
 
-                case 0x09: /* break */
-                {
+                            break;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                b = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                b = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == 'a')
+                        {
+                            b = run_alpha(root_alpha, i);
+                            *i += 1;
+
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected value, address or alpha\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+
                     *i += 1;
                     for(; *i < strlen(root_alpha); *i += 1)
                     {
@@ -1296,19 +1380,984 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                     }
                     *i += 1;
 
-                    if(in_loop)
-                    {
-                        in_loop = 0;
-                    }
-                    else
-                    {
-                        fprintf(stderr, "error:%d: cannot break outside a loop", *i);
+                    return a > b;
+                }
 
-                        error = 1;
-                        return 0;
+                case 0x09: /* less than */
+                {
+                    uint8_t a, b;
+
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == '#')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = hexstr2byte((char*)num);
+                            *i += 1;
+
+                            break;
+                        } 
+                        else if(root_alpha[*i] == '$')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = mem[hexstr2byte((char*)num)];
+                            *i += 1;
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                a = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                a = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == 'a')
+                        {
+                            a = run_alpha(root_alpha, i);
+                            *i += 1;
+
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected value, address or alpha\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
                     }
 
-                    return 0;
+                    *i += 1;
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == ',')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected character ','\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+                    *i += 1;
+                    
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == '#')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = hexstr2byte((char*)num);
+                            *i += 1;
+
+                            break;
+                        } 
+                        else if(root_alpha[*i] == '$')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = mem[hexstr2byte((char*)num)];
+                            *i += 1;
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                b = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                b = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == 'a')
+                        {
+                            b = run_alpha(root_alpha, i);
+                            *i += 1;
+
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected value, address or alpha\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+
+                    *i += 1;
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == ')')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected character ')'\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+                    *i += 1;
+
+                    return a < b;
+                }
+
+                case 0x0a: /* equal to */
+                {
+                    uint8_t a, b;
+
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == '#')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = hexstr2byte((char*)num);
+                            *i += 1;
+
+                            break;
+                        } 
+                        else if(root_alpha[*i] == '$')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = mem[hexstr2byte((char*)num)];
+                            *i += 1;
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                a = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                a = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == 'a')
+                        {
+                            a = run_alpha(root_alpha, i);
+                            *i += 1;
+
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected value, address or alpha\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+
+                    *i += 1;
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == ',')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected character ','\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+                    *i += 1;
+                    
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == '#')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = hexstr2byte((char*)num);
+                            *i += 1;
+
+                            break;
+                        } 
+                        else if(root_alpha[*i] == '$')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = mem[hexstr2byte((char*)num)];
+                            *i += 1;
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                b = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                b = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == 'a')
+                        {
+                            b = run_alpha(root_alpha, i);
+                            *i += 1;
+
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected value, address or alpha\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+
+                    *i += 1;
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == ')')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected character ')'\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+                    *i += 1;
+
+                    return a == b;
+                }
+
+                case 0x0b: /* and */
+                {
+                    uint8_t a, b;
+
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == '#')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = hexstr2byte((char*)num);
+                            *i += 1;
+
+                            break;
+                        } 
+                        else if(root_alpha[*i] == '$')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = mem[hexstr2byte((char*)num)];
+                            *i += 1;
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                a = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                a = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == 'a')
+                        {
+                            a = run_alpha(root_alpha, i);
+                            *i += 1;
+
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected value, address or alpha\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+
+                    *i += 1;
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == ',')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected character ','\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+                    *i += 1;
+                    
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == '#')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = hexstr2byte((char*)num);
+                            *i += 1;
+
+                            break;
+                        } 
+                        else if(root_alpha[*i] == '$')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = mem[hexstr2byte((char*)num)];
+                            *i += 1;
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                b = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                b = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == 'a')
+                        {
+                            b = run_alpha(root_alpha, i);
+                            *i += 1;
+
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected value, address or alpha\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+
+                    *i += 1;
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == ')')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected character ')'\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+                    *i += 1;
+
+                    return a && b;
+                }
+
+                case 0x0c: /* or */
+                {
+                    uint8_t a, b;
+
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == '#')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = hexstr2byte((char*)num);
+                            *i += 1;
+
+                            break;
+                        } 
+                        else if(root_alpha[*i] == '$')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = mem[hexstr2byte((char*)num)];
+                            *i += 1;
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                a = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                a = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == 'a')
+                        {
+                            a = run_alpha(root_alpha, i);
+                            *i += 1;
+
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected value, address or alpha\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+
+                    *i += 1;
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == ',')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected character ','\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+                    *i += 1;
+                    
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == '#')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = hexstr2byte((char*)num);
+                            *i += 1;
+
+                            break;
+                        } 
+                        else if(root_alpha[*i] == '$')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = mem[hexstr2byte((char*)num)];
+                            *i += 1;
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                b = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                b = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == 'a')
+                        {
+                            b = run_alpha(root_alpha, i);
+                            *i += 1;
+
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected value, address or alpha\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+
+                    *i += 1;
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == ')')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected character ')'\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+                    *i += 1;
+
+                    return a || b;
+                }
+
+                case 0x0d: /* xor */
+                {
+                    uint8_t a, b;
+
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == '#')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = hexstr2byte((char*)num);
+                            *i += 1;
+
+                            break;
+                        } 
+                        else if(root_alpha[*i] == '$')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            a = mem[hexstr2byte((char*)num)];
+                            *i += 1;
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                a = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                a = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == 'a')
+                        {
+                            a = run_alpha(root_alpha, i);
+                            *i += 1;
+
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected value, address or alpha\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+
+                    *i += 1;
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == ',')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected character ','\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+                    *i += 1;
+                    
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == '#')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = hexstr2byte((char*)num);
+                            *i += 1;
+
+                            break;
+                        } 
+                        else if(root_alpha[*i] == '$')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            b = mem[hexstr2byte((char*)num)];
+                            *i += 1;
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                b = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                b = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == 'a')
+                        {
+                            b = run_alpha(root_alpha, i);
+                            *i += 1;
+
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected value, address or alpha\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+
+                    *i += 1;
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == ')')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected character ')'\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+                    *i += 1;
+
+                    return ((a || b) && !(a && b));
+                }
+
+                case 0x0e: /* exit */
+                {
+                    uint8_t val;
+
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == '#')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            val = hexstr2byte((char*)num);
+                            *i += 1;
+
+                            break;
+                        } 
+                        else if(root_alpha[*i] == '$')
+                        {
+                            char num[3];
+                            *i += 1;
+                            num[0] = root_alpha[*i];
+                            num[1] = root_alpha[*i + 1];
+                            num[2] = '\0';
+                            val = mem[hexstr2byte((char*)num)];
+                            *i += 1;
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == '\'')
+                        {
+                            *i += 1;
+                            if(root_alpha[*i] != '$')
+                            {
+                                val = root_alpha[*i];
+                            }
+                            else
+                            {
+                                *i += 1;
+                                val = get_ctrl_char(root_alpha[*i]);
+                            }
+
+                            *i += 1;
+                            if(root_alpha[*i] != '\'')
+                            {
+                                fprintf(stderr, "error:%d: expected character '''\n", *i);
+
+                                error = 1;
+                                return 0;
+                            }
+
+                            break;
+                        }
+                        else if(root_alpha[*i] == 'a')
+                        {
+                            val = run_alpha(root_alpha, i);
+                            *i += 1;
+
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected value, address or alpha\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+
+                    *i += 1;
+                    for(; *i < strlen(root_alpha); *i += 1)
+                    {
+                        if(root_alpha[*i] == ' ') {}
+                        else if(root_alpha[*i] == ')')
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error:%d: expected character ')'\n", *i);
+
+                            error = 1;
+                            return 0;
+                        }
+                    }
+                    *i += 1;
+
+                    return !val;
                 }
             }
         }
