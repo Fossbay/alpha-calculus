@@ -2268,7 +2268,7 @@ uint8_t run_alpha(char* root_alpha, uint8_t* i)
                     return ((a || b) && !(a && b));
                 }
 
-                case 0x0e: /* exit */
+                case 0x0e: /* not */
                 {
                     uint8_t val;
 
